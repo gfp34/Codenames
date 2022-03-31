@@ -1,12 +1,14 @@
-import math
 from collections import namedtuple
 from colorama import Fore, Back
 import random
 
-BLANK = 0
-BLUE = 1
-RED = 2
-BLACK = 3
+from spymaster import Spymaster, SpymasterRandom
+from field_operative import FieldOperative, FieldOperativeRandom
+
+BLANK = "BLANK"
+BLUE = "BLUE"
+RED = "RED"
+BLACK = "BLACK"
 
 
 def main():
@@ -16,12 +18,12 @@ def main():
 	board = Board(card_list)
 	board.print_words()
 
-	red_spy = Spymaster(RED, board, word_list)
-	num_guesses, spaces, clue = red_spy.random_clue()
+	red_spy = SpymasterRandom(RED, board, word_list)
+	num_guesses, spaces, clue = red_spy.clue()
 	print(num_guesses, spaces, clue)
 
-	red_field_op = FieldOperative(RED, board)
-	guesses = red_field_op.random_guess(clue, num_guesses)
+	red_field_op = FieldOperativeRandom(RED, board)
+	guesses = red_field_op.guess(clue, num_guesses)
 	print(guesses)
 
 
@@ -33,7 +35,7 @@ class Board:
 		BOARD_SIZE = 25
 
 		# Determine start color and randomly select board colors
-		start_color = random.randint(BLUE, RED)
+		start_color = random.choice([RED, BLUE])
 
 		# Randomly select 25 words for the board
 		self.words = random.sample(all_words, BOARD_SIZE)
@@ -84,35 +86,6 @@ class Board:
 
 		for i in range(5):
 			print(' '.join(styled_words[i*5: i*5+5]) + (Back.RESET + Fore.RESET + ''))
-
-
-class Spymaster:
-	def __init__(self, color, board, clues_dict):
-		self.color = color
-		self.board = board
-		self.clues_dict = clues_dict
-
-	def random_clue(self):
-		num_guesses = round(random.gauss(2, 1))
-		num_guesses = 1 if num_guesses < 1 else num_guesses
-		try_spaces = self.board.get_color_spaces(self.color)
-		guesses = random.sample(try_spaces, num_guesses)
-		return num_guesses, guesses, random.choice(self.clues_dict)
-
-
-class FieldOperative:
-	def __init__(self, color, board):
-		self.color = color
-		self.board = board
-
-	def random_guess(self, clue, num_guesses):
-		guesses = random.sample(self.board.spaces, num_guesses)
-		guess_confidence = {}
-		for guess in guesses:
-			guess_confidence[guess] = 1 / (1 + math.exp(-random.gauss(.5, 1)))
-		good_guesses = [(guess, guess_confidence[guess]) for guess in guesses if guess_confidence[guess] > 0.5]
-		good_guesses.sort(key=lambda x: x[1], reverse=True)
-		return good_guesses
 
 
 if __name__ == '__main__':
