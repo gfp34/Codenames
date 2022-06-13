@@ -71,6 +71,14 @@ class Board:
 		else:
 			return None
 
+	def get_opposite_color_spaces(self, color):
+		if color is RED:
+			return self.blues
+		elif color is BLUE:
+			return self.reds
+		else:
+			return None
+
 	def print_words(self):
 		styled_words = []
 		max_word_len = max([len(word) for word in self.words])
